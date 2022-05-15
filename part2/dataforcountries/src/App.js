@@ -3,6 +3,25 @@ import axios from "axios";
 
 // CountryView Component
 const CountryView = ({ country }) => {
+  const [weatherData, setWeatherData] = useState({});
+  const api_key = process.env.REACT_APP_API_KEY;
+  const coordinates_endpoint = `http://api.openweathermap.org/geo/1.0/direct?q=${country.capital},${country.ccn3}&appid=${api_key}`;
+
+  useState(() => {
+    axios.get(coordinates_endpoint)
+    .then((response) => {
+      if (response.data[0] !== undefined) {
+        const lat = response.data[0]["lat"];
+        const lon = response.data[0]["lon"];
+        const weather_endpoint = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}`;
+
+        axios.get(weather_endpoint).then((response) => {
+          setWeatherData(response.data);
+        });
+      }
+    });
+  }, []);
+
   return (
     <div>
       <h1>{country.name.common}</h1>
@@ -11,11 +30,24 @@ const CountryView = ({ country }) => {
 
       <h3>languages: </h3>
       <ul>
-        {Object.values(country.languages).map((language) => (
+        {country.languages && Object.values(country.languages).map((language) => (
           <li key={language}>{language}</li>
         ))}
       </ul>
       <img src={country.flags.png} alt="flag" />
+
+      {Object.keys(weatherData).length !== 0 ? (
+        <div>
+          <h2>Weather in {country.capital}</h2>
+          <p>temperature {(weatherData.main.temp - 273).toFixed(2)} Celsius</p>
+          <img
+            src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
+          />
+          <p>wind {weatherData.wind.speed} m/s</p>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 };
@@ -27,7 +59,6 @@ const App = () => {
 
   // loads data using axios api
   useEffect(() => {
-    console.log("effect");
     axios.get("https://restcountries.com/v3.1/all").then((response) => {
       setCountriesData(response.data);
     });
