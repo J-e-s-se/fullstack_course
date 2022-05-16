@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import personsService from "./services/persons";
 
-const Persons = ({ persons, performSearchFilter }) => {
+const Persons = ({ persons, performSearchFilter, deletePerson }) => {
   return (
     <>
       {persons.filter(performSearchFilter).map((person) => (
         <p key={person.id}>
           {person.name} {person.number}
+          <button onClick={() => deletePerson(person)}>delete</button>
         </p>
       ))}
     </>
@@ -74,11 +75,9 @@ const App = () => {
       id: persons.length + 1,
     };
 
-    personsService
-      .create(newPersonObj)
-      .then((returnedPerson) => {
-        setPersons((oldPersons) => oldPersons.concat(returnedPerson));
-      });
+    personsService.create(newPersonObj).then((returnedPerson) => {
+      setPersons((oldPersons) => oldPersons.concat(returnedPerson));
+    });
 
     setNewName("");
     setNewNumber("");
@@ -92,12 +91,20 @@ const App = () => {
     return person.name.toLowerCase().includes(search.toLowerCase());
   };
 
+  const deletePerson = (person) => {
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      personsService
+      .remove(person.id)
+      .then(
+        setPersons(oldPersons => oldPersons.filter(p => p.id !== person.id))
+      )
+    }
+  };
+
   useEffect(() => {
-    personsService
-      .list()
-      .then((initialPersons) => {
-        setPersons(initialPersons)
-      })
+    personsService.list().then((initialPersons) => {
+      setPersons(initialPersons);
+    });
   }, []);
 
   return (
@@ -116,7 +123,11 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <Persons persons={persons} performSearchFilter={performSearchFilter} />
+      <Persons
+        persons={persons}
+        performSearchFilter={performSearchFilter}
+        deletePerson={deletePerson}
+      />
     </div>
   );
 };
