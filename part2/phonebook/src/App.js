@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import personsService from "./services/persons";
 
 const Persons = ({ persons, performSearchFilter }) => {
   return (
@@ -74,10 +74,12 @@ const App = () => {
       id: persons.length + 1,
     };
 
-    axios.post("http://localhost:3001/persons", newPersonObj).then((response) => {
-      setPersons((oldPersons) => oldPersons.concat(response.data));
-    });
-    
+    personsService
+      .create(newPersonObj)
+      .then((returnedPerson) => {
+        setPersons((oldPersons) => oldPersons.concat(returnedPerson));
+      });
+
     setNewName("");
     setNewNumber("");
   };
@@ -91,9 +93,11 @@ const App = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
-    });
+    personsService
+      .list()
+      .then((initialPersons) => {
+        setPersons(initialPersons)
+      })
   }, []);
 
   return (
