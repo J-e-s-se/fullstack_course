@@ -14,6 +14,18 @@ const Persons = ({ persons, performSearchFilter, deletePerson }) => {
   );
 };
 
+const Notification = ({notification}) => {
+  if (notification.message === null) {
+    return null
+  }
+
+  return (
+    <div className={notification.classname}>
+      {notification.message}
+    </div>
+  )
+}
+
 const PersonForm = (props) => {
   const {
     newName,
@@ -56,6 +68,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [notification, setNotification] = useState({message: null, classname: null})
 
   const handleNumberChange = (event) => {
     setNewNumber(event.target.value);
@@ -96,6 +109,10 @@ const App = () => {
           :
           (oldPersons.concat(returnedPerson))
         })
+        setNotification({message: `Added ${returnedPerson.name}`, classname: "success"})
+        setTimeout(() => {
+          setNotification({message: null, classname: null})
+        }, 5000)
         setNewName("")
         setNewNumber("")
       })
@@ -129,9 +146,8 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <Filter search={search} handleSearchChange={handleSearchChange} />
-
       <h3>add a new</h3>
-
+      <Notification notification={notification} />
       <PersonForm
         newName={newName}
         newNumber={newNumber}
