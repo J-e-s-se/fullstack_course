@@ -116,6 +116,12 @@ const App = () => {
         setNewName("")
         setNewNumber("")
       })
+      .catch((error) => {
+        setNotification({message: `Information of ${newPerson.name} has already been removed from the server`, classname: "error"})
+        setTimeout(() => {
+          setNotification({message: null, classname: null})
+        }, 5000)
+      })
   };
 
   const handleSearchChange = (event) => {
