@@ -6,8 +6,13 @@ const list = () => {
   return request.then(response => response.data)
 }
 
-const create = (newObject) => {
-  const request = axios.post(baseUrl, newObject)
+const create = (newData) => {
+  const request = axios.post(baseUrl, newData)
+  return request.then(response => response.data)
+}
+
+const update = (id, newData) => {
+  const request = axios.put(`${baseUrl}/${id}`, newData)
   return request.then(response => response.data)
 }
 
@@ -16,4 +21,4 @@ const remove = (id) => {
   return request
 }
 
-export default {list, create, remove}
+export default {list, create, update, remove}

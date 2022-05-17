@@ -6,7 +6,7 @@ const Persons = ({ persons, performSearchFilter, deletePerson }) => {
     <>
       {persons.filter(performSearchFilter).map((person) => (
         <p key={person.id}>
-          {person.name} {person.number}
+          {person.name} {person.number}{" "}
           <button onClick={() => deletePerson(person)}>delete</button>
         </p>
       ))}
@@ -25,12 +25,12 @@ const PersonForm = (props) => {
   return (
     <form onSubmit={addPerson}>
       <div>
-        name:
+        name:{" "}
         <input value={newName} onChange={handleNameChange} />
       </div>
 
       <div>
-        number:
+        number:{" "}
         <input value={newNumber} onChange={handleNumberChange} />
       </div>
 
@@ -44,7 +44,7 @@ const PersonForm = (props) => {
 const Filter = ({ search, handleSearchChange }) => {
   return (
     <div>
-      filter shown with
+      filter shown with{" "}
       <input value={search} onChange={handleSearchChange} />
     </div>
   );
@@ -68,19 +68,37 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault();
     const nameIsUsed = persons.some((person) => person.name === newName);
-    nameIsUsed && alert(`${newName} is already added to phonebook`);
-    const newPersonObj = {
-      name: newName,
-      number: newNumber,
-      id: persons.length + 1,
-    };
+    nameIsUsed && alert(`${newName} is already added to phonebook, replace the old number with a new one?`);
 
-    personsService.create(newPersonObj).then((returnedPerson) => {
-      setPersons((oldPersons) => oldPersons.concat(returnedPerson));
-    });
+    let newPerson;
+    let promise;
 
-    setNewName("");
-    setNewNumber("");
+    if (nameIsUsed) {
+      const prevPerson = persons.find(p => p.name === newName)
+      newPerson = {...prevPerson, "number" : newNumber}
+      promise = personsService.update(newPerson.id, newPerson)
+    }
+
+    else {
+      newPerson = {
+        name: newName,
+        number: newNumber,
+        id: persons.length + 1
+      }
+      promise = personsService.create(newPerson)
+    }
+    
+    promise
+      .then(returnedPerson => {
+        setPersons(oldPersons => {
+          return nameIsUsed ?
+          (oldPersons.filter(p => p.id !== returnedPerson.id).concat(returnedPerson))
+          :
+          (oldPersons.concat(returnedPerson))
+        })
+        setNewName("")
+        setNewNumber("")
+      })
   };
 
   const handleSearchChange = (event) => {
